@@ -94,4 +94,52 @@ AlohaHelper::AssignStreams (NetDeviceContainer c, int64_t stream)
 	return (currentStream - stream);
 }
 
+void
+AlohaHelper::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream,
+                                std::string prefix,
+                                Ptr<NetDevice> nd,
+                                bool explicitFilename)
+{
+    //
+    // All of the ascii enable functions vector through here including the ones
+    // that are wandering through all of devices on perhaps all of the nodes in
+    // the system.  We can only deal with devices of type CsmaNetDevice.
+    //
+    Ptr<AlohaNetDevice> device = nd->GetObject<AlohaNetDevice>();
+    if (!device)
+    {
+        NS_LOG_INFO("AlohaHelper::EnableAsciiInternal(): Device "
+                    << device << " not of type ns3::AlohaNetDevice");
+        return;
+    }
+
+    //
+    // Our default trace sinks are going to use packet printing, so we have to
+    // make sure that is turned on.
+    //
+    Packet::EnablePrinting();
+
+    //
+    // If we are not provided an OutputStreamWrapper, we are expected to create
+    // one using the usual trace filename conventions and do a Hook*WithoutContext
+    // since there will be one file per context and therefore the context would
+    // be redundant.
+    //
+    if (!stream)
+    {
+		NS_FATAL_ERROR("No OutputStreamWrapper provided");
+    }
+
+	AsciiTraceHelper asciiTraceHelper;
+
+	auto mac = device->GetMac();
+	NS_ASSERT_MSG(mac, "Attempted to attach trace to uninitialized device");
+
+	asciiTraceHelper.HookDefaultReceiveSinkWithoutContext<AlohaMac>(mac, "AckReceive", stream);
+	asciiTraceHelper.HookDefaultEnqueueSinkWithoutContext<AlohaMac>(mac, "Enqueue", stream);
+	// asciiTraceHelper.
+	// asciiTraceHelper.HookDefaultDropSinkWithoutContext<AlohaMac>(mac, "Drop", stream);
+	// asciiTraceHelper.HookDefaultDequeueSinkWithoutContext<AlohaMac>(mac, "Dequeue", stream);
+}
+
 } /* namespace ns3 */

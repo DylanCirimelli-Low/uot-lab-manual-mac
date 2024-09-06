@@ -7,5 +7,7 @@ git clone git@github.com:DylanCirimelli-Low/uot-lab-manual-mac.git contrib/
 ./ns3 configure --enable-python-bindings
 ./ns3 
 cp contrib/aloha/examples/aloha.py scrach/
-./ns3 run aloha.py
+cp contrib/topology1.txt .
+cp contrib/attributes.txt .
+./ns3 run "aloha.py --topology=topology1.txt"
 

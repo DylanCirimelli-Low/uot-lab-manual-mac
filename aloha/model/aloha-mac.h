@@ -63,9 +63,12 @@ protected:
     void Transmit(void);
     void TransmitAck(Mac48Address dst);
 
+    void StartBackoff(void);
     void AckTimeout(void);
 
 private:
+
+    Time GetAckTime(void) const;
 
     NetDeviceReceiveCallback m_netDeviceReceive;
     Mac48Address m_macAddress;
@@ -82,8 +85,12 @@ private:
     Timer m_transmissionTimer;
     Timer m_ackTimer;
 
-    TracedCallback<Mac48Address> m_enqueueTrace;
-    TracedCallback<Mac48Address> m_ackTrace;
+    TracedCallback<Ptr<ns3::Packet const>> m_enqueueTrace;
+    TracedCallback<Ptr<ns3::Packet const>> m_ackTrace;
+    TracedCallback<Ptr<ns3::Packet const>> m_macTxTrace;
+
+    bool m_usePriorityAcks;
+    bool m_useCarrierSensing;
 
     
 }; /* class AlohaMac */

@@ -243,11 +243,22 @@ WirelessPhy::IsReceiving(void)
 
 Time
 WirelessPhy::GetPacketTime(Ptr<const Packet> packet)
-{
+{   
     Time phyTime = Seconds(24 * 8.0 / _1MBPS);
     Time packetTime = m_channel->GetDataRate().CalculateBytesTxTime(packet->GetSize());
     return phyTime + packetTime;
 }
+
+Time
+WirelessPhy::GetTransmissionTime(Ptr<const Packet> packet)
+{   
+    auto copy = packet->Copy();
+    PlcpHeader plcp;
+    copy->AddHeader(plcp);
+
+    return GetPacketTime(copy);
+}
+
 
 Time
 WirelessPhy::GetInterframeGap(void)

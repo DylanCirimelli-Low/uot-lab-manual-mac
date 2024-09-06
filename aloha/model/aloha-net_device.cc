@@ -83,14 +83,14 @@ AlohaNetDevice::DoDispose (void)
 void
 AlohaNetDevice::Receive(Ptr<const Packet> packet, const Address& address)
 {
-    NS_LOG_DEBUG("Recevied packet " << packet << " from " << address);
+    NS_LOG_INFO("Recevied ACK " << packet << " from " << address);
     m_networkUpcall(this, packet, 0, address);  
 }
 
 bool
 AlohaNetDevice::Send (Ptr<Packet> packet, const Address& dest, uint16_t protocolNumber)
 {
-    NS_LOG_DEBUG("sending packet " << *packet << " from " << GetAddress() << " to address " << dest << "(proto=" << protocolNumber << ")");
+    NS_LOG_INFO("Enqueuing packet " << packet << " from " << GetAddress() );
     NS_ASSERT(m_mac);
     
     return m_mac->Send(packet);
@@ -165,6 +165,7 @@ bool
 AlohaNetDevice::SetMtu (const uint16_t mtu)
 {
     m_mtu = mtu;
+    return true;
 }
 
 uint16_t

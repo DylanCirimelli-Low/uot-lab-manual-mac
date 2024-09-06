@@ -42,14 +42,16 @@ public:
     void StartReceive(Ptr<const TransmissionVector> rxVector);
     void FinishReceive(Ptr<const TransmissionVector> rxVector);
 
-    Time GetPacketTime(Ptr<const Packet> packet);
-    Time GetInterframeGap(void);
     
+    Time GetInterframeGap(void);
+    Time GetTransmissionTime(Ptr<const Packet> packet); 
     bool IsIdle(void);
     bool IsTransmitting(void);
     bool IsReceiving(void);
 
 private:
+    Time GetPacketTime(Ptr<const Packet> packet);
+
     std::list < Ptr<TransmissionUnit> > m_transmissions;
     Ptr<WirelessChannel> m_channel;
     Ptr<NetDevice> m_device;
