@@ -10,6 +10,8 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("AlohaHelper");
 
+std::map<uint32_t, Time> AlohaHelper::m_delays;
+
 AlohaHelper::AlohaHelper() {
 	m_deviceFactory.SetTypeId ("ns3::AlohaNetDevice");
 	m_phyFactory.SetTypeId ("ns3::WirelessPhy");
@@ -94,6 +96,38 @@ AlohaHelper::AssignStreams (NetDeviceContainer c, int64_t stream)
 	return (currentStream - stream);
 }
 
+void AlohaHelper::ReceiveSinkWithContext(Ptr<OutputStreamWrapper> stream,
+                                                std::string context,
+                                                Ptr<const Packet> p)
+{	
+	AlohaMacPacketTag tag;
+	p->PeekPacketTag(tag);
+
+	NS_ASSERT_MSG(m_delays.count(tag.GetPacketUid()) == true, "This packet should have been enqueued at a node.");
+
+	Time delay = Simulator::Now() - m_delays.at(tag.GetPacketUid());
+    NS_LOG_FUNCTION(stream << p);
+    *stream->GetStream() << "r " << Simulator::Now().GetSeconds() << " " << context << " " << delay.GetSeconds() << " " << tag.GetPacketSize()
+                         << std::endl;
+
+	
+}
+
+void AlohaHelper::EnqueueSinkWithContext(Ptr<OutputStreamWrapper> stream,
+                                                std::string context,
+                                                Ptr<const Packet> p)
+{	
+	AlohaMacPacketTag tag;
+	p->PeekPacketTag(tag);
+
+    NS_LOG_FUNCTION(stream << p);
+    *stream->GetStream() << "+ " << Simulator::Now().GetSeconds() << " " << context << " "
+                         << std::endl;
+	
+	NS_ASSERT_MSG(m_delays.count(p->GetUid()) == false, "We have already enqueued this packet UID somewhere");
+	m_delays[p->GetUid()] = Simulator::Now();
+}
+
 void
 AlohaHelper::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream,
                                 std::string prefix,
@@ -117,7 +151,7 @@ AlohaHelper::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream,
     // Our default trace sinks are going to use packet printing, so we have to
     // make sure that is turned on.
     //
-    Packet::EnablePrinting();
+    // Packet::EnablePrinting();
 
     //
     // If we are not provided an OutputStreamWrapper, we are expected to create
@@ -135,9 +169,24 @@ AlohaHelper::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream,
 	auto mac = device->GetMac();
 	NS_ASSERT_MSG(mac, "Attempted to attach trace to uninitialized device");
 
-	asciiTraceHelper.HookDefaultReceiveSinkWithoutContext<AlohaMac>(mac, "AckReceive", stream);
-	asciiTraceHelper.HookDefaultEnqueueSinkWithoutContext<AlohaMac>(mac, "Enqueue", stream);
-	// asciiTraceHelper.
+	std::string nodeName = std::to_string(nd->GetNode()->GetId());
+
+    bool result = mac->TraceConnect("AckReceive",
+                                       nodeName,
+                                       MakeBoundCallback(&AlohaHelper::ReceiveSinkWithContext, stream));
+    NS_ASSERT_MSG(result == true,
+                  "Unable to hook \""
+                      << "AckReceive" << "\"");
+
+	result = mac->TraceConnect("Enqueue",
+										nodeName,
+										MakeBoundCallback(&AlohaHelper::EnqueueSinkWithContext, stream));
+	NS_ASSERT_MSG(result == true,
+				" Unable to hook \""
+					<< "AckReceive" << "\"");
+
+	// asciiTraceHelper.HookDefaultReceiveSinkWithContext<AlohaMac>(mac, nodeName, "AckReceive", stream);
+	// asciiTraceHelper.HookDefaultEnqueueSinkWithContext<AlohaMac>(mac, nodeName, "Enqueue", stream);
 	// asciiTraceHelper.HookDefaultDropSinkWithoutContext<AlohaMac>(mac, "Drop", stream);
 	// asciiTraceHelper.HookDefaultDequeueSinkWithoutContext<AlohaMac>(mac, "Dequeue", stream);
 }

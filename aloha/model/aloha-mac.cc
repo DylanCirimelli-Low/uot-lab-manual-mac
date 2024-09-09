@@ -182,7 +182,7 @@ AlohaMac::Receive(Ptr<Packet> packet)
 
     // send ACK if we are the sink node and receive data
     if (m_macAddress == m_sinkAddress) {
-        TransmitAck( header.GetSrc() );
+        TransmitAck( packet, header.GetSrc() );
     }
 
     // cancel ACK timer if we are the intended receiver of the ACK
@@ -210,13 +210,17 @@ AlohaMac::Receive(Ptr<Packet> packet)
 }
 
 void 
-AlohaMac::TransmitAck(Mac48Address dst)
+AlohaMac::TransmitAck(Ptr<const Packet> p, Mac48Address dst)
 {
     NS_LOG_FUNCTION(this << dst);
+
+    AlohaMacPacketTag tag(p->GetUid(), p->GetSize());
 
     AlohaHeader ack = AlohaHeader(m_macAddress, dst);
     Ptr<Packet> packet = Create<Packet>(0);
     packet->AddHeader(ack);
+    packet->AddPacketTag(tag);
+    
     NS_LOG_INFO("sending ACK " << packet << " to PHY");
     m_phy->Send(packet);
 }

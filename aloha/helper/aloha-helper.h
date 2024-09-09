@@ -24,6 +24,13 @@ public:
 	NetDeviceContainer Install (const NodeContainer &container) const;
 	NetDeviceContainer Install (const NodeContainer &container, Ptr<WirelessChannel> channel) const;
 
+    static void ReceiveSinkWithContext(Ptr<OutputStreamWrapper> stream,
+                                                    std::string context,
+                                                    Ptr<const Packet> p);
+                                                    
+    static void EnqueueSinkWithContext(Ptr<OutputStreamWrapper> stream,
+                                                    std::string context,
+                                                    Ptr<const Packet> p);    
     /**
      * \brief Enable ascii trace output on the indicated net device.
      *
@@ -42,7 +49,10 @@ public:
 
 	int64_t AssignStreams (NetDeviceContainer c, int64_t stream);
 
+    static std::map<uint32_t, Time> m_delays;
+    
 private:
+                   
 	ObjectFactory m_deviceFactory;
 	ObjectFactory m_phyFactory;
 	ObjectFactory m_channelFactory;

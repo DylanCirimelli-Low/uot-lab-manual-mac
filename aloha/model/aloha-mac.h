@@ -25,9 +25,79 @@
 
 namespace ns3 {
 
+class AlohaMacPacketTag : public Tag
+{
+  public:
+    /**
+     * \brief Constructor
+     * \param uid the packet uid
+     */
+    AlohaMacPacketTag(uint32_t uid = -1, uint32_t size = -1)
+        : Tag(),
+          m_uid(uid),
+          m_size(size)
+    {
+    }
+
+    /**
+     * \brief Get the type ID.
+     * \return the object TypeId
+     */ 
+    static TypeId GetTypeId()
+    {
+        static TypeId tid = TypeId("ns3::Aloha::AlohaMacPacketTag")
+                                .SetParent<Tag>()
+                                .SetGroupName("Aloha")
+                                .AddConstructor<AlohaMacPacketTag>();
+        return tid;
+    }
+
+    TypeId GetInstanceTypeId() const override
+    {
+        return GetTypeId();
+    }
+
+    uint32_t GetPacketUid() const
+    {
+        return m_uid;
+    }
+
+    uint32_t GetPacketSize() const
+    {
+        return m_size;
+    }
+
+    uint32_t GetSerializedSize() const override
+    {
+        return sizeof(uint32_t) * 2;
+    }
+
+    void Serialize(TagBuffer i) const override
+    {
+        i.WriteU32(m_uid);
+        i.WriteU32(m_size);
+    }
+
+    void Deserialize(TagBuffer i) override
+    {
+        m_uid = i.ReadU32();
+        m_size = i.ReadU32();
+    }
+
+    void Print(std::ostream& os) const override
+    {
+        os << "" << m_uid << ", " << m_size;
+    }
+
+  private:
+    uint32_t m_uid;
+    uint32_t m_size;
+};
+
 class AlohaMac : public Object {
 
 public:
+
 
     static TypeId GetTypeId (void);
     AlohaMac();   
@@ -61,7 +131,7 @@ protected:
     void FinishTransmit(void);
 
     void Transmit(void);
-    void TransmitAck(Mac48Address dst);
+    void TransmitAck(Ptr<const Packet> p, Mac48Address dst);
 
     void StartBackoff(void);
     void AckTimeout(void);
