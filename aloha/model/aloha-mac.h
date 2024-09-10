@@ -147,6 +147,8 @@ private:
     Ptr<WirelessMacUpcalls> m_macUpcalls;
     Ptr<DropTailQueue<Packet>> m_packetQueue;
 
+    uint32_t m_jitter;
+    uint32_t m_factor;
     uint32_t m_backoffExponent;
     uint32_t m_minBackoffExponent;
     uint32_t m_maxBackoffExponent;

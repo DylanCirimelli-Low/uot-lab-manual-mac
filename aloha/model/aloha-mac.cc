@@ -51,7 +51,17 @@ AlohaMac::GetTypeId (void)
                     "Whether carrier sensing is used",
                     BooleanValue (false),
                     MakeBooleanAccessor(&AlohaMac::m_useCarrierSensing),
-                    MakeBooleanChecker ());
+                    MakeBooleanChecker ())
+            .AddAttribute ("BackoffFactor",
+                    "Scale factor of the backoff window (in microseconds)",
+                    UintegerValue(1000),
+                    MakeUintegerAccessor(&AlohaMac::m_factor),
+                    MakeUintegerChecker<uint32_t>())
+            .AddAttribute ("Jitter",
+                    "[0, m_jitter] microsecond jitter after enqueueing a packet in an empty TX queue",
+                    UintegerValue(1000),
+                    MakeUintegerAccessor(&AlohaMac::m_jitter),
+                    MakeUintegerChecker<uint32_t>());
 
     return tid;
 }
@@ -161,8 +171,8 @@ AlohaMac::Send(Ptr<Packet> packet)
         NS_ASSERT(m_transmissionTimer.IsExpired());
         NS_ASSERT(m_ackTimer.IsExpired());
         // Start the transmission timer if we now have data to send
-        Time delay = MicroSeconds(m_rand->GetInteger(0, std::pow(2, m_backoffExponent) * 1000));
-        Time jitter = MicroSeconds(m_rand->GetInteger(0, 1000));
+        Time delay = MicroSeconds(m_rand->GetInteger(0, std::pow(2, m_backoffExponent) * m_factor));
+        Time jitter = MicroSeconds(m_rand->GetInteger(0, m_jitter));
         m_transmissionTimer.Schedule(delay + jitter);
         NS_LOG_INFO("Arrival in empty tx queue. Scheduling transmission for " << delay + jitter + Simulator::Now());
     }
@@ -196,7 +206,7 @@ AlohaMac::Receive(Ptr<Packet> packet)
         auto packet = m_packetQueue->Dequeue();
         // schedule next transmission if we have more data to send
         if (!m_packetQueue->IsEmpty()) {
-            Time delay = MicroSeconds(m_rand->GetInteger(0, std::pow(2, m_backoffExponent) * 1000));
+            Time delay = MicroSeconds(m_rand->GetInteger(0, std::pow(2, m_backoffExponent) * m_factor));
             m_transmissionTimer.Schedule(delay);
         }
          m_netDeviceReceive(packet, header.GetSrc());
@@ -234,7 +244,7 @@ AlohaMac::StartBackoff(void)
     NS_ASSERT(m_transmissionTimer.IsRunning() == false);
     NS_ASSERT(m_ackTimer.IsRunning() == false);
     m_backoffExponent = std::min( (++m_backoffExponent) , m_maxBackoffExponent);
-    Time delay = MicroSeconds(m_rand->GetInteger(0, std::pow(2, m_backoffExponent) * 1000));
+    Time delay = MicroSeconds(m_rand->GetInteger(0, std::pow(2, m_backoffExponent) * m_factor));
     m_transmissionTimer.Schedule(delay);
     NS_LOG_INFO("Next transmission at " << Simulator::Now() + delay << ". (backoff exp = " << m_backoffExponent << ")");
 }
