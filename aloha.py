@@ -3,7 +3,7 @@ from ctypes import c_char_p, create_string_buffer
 import sys
 
 # ns.LogComponentEnable("UdpEchoClientApplication", ns.LOG_LEVEL_INFO)
-# ns.LogComponentEnable("AlohaMac", ns.LOG_LEVEL_INFO | ns.LOG_PREFIX_NODE | ns.LOG_PREFIX_TIME | ns.LOG_PREFIX_FUNC)
+ns.LogComponentEnable("AlohaMac", ns.LOG_LEVEL_INFO | ns.LOG_PREFIX_NODE | ns.LOG_PREFIX_TIME | ns.LOG_PREFIX_FUNC)
 # ns.LogComponentEnable("AlohaNetDevice", ns.LOG_LEVEL_INFO | ns.LOG_PREFIX_NODE | ns.LOG_PREFIX_TIME | ns.LOG_PREFIX_FUNC)
 # ns.LogComponentEnable("WirelessPhy", ns.LOG_LEVEL_DEBUG | ns.LOG_PREFIX_NODE | ns.LOG_PREFIX_TIME | ns.LOG_PREFIX_FUNC)
 # ns.LogComponentEnable("WirelessChannel", ns.LOG_LEVEL_DEBUG | ns.LOG_PREFIX_NODE | ns.LOG_PREFIX_TIME | ns.LOG_PREFIX_FUNC)
@@ -68,6 +68,6 @@ sinkAddress = interfaces.GetAddress(0).ConvertTo()
 echoClient = ns.UdpEchoClientHelper(sinkAddress, 9)
 clientApps = echoClient.Install(nodes)
 
-ns.Simulator.Stop(ns.Seconds(30))
+ns.Simulator.Stop(ns.Seconds(10))
 ns.Simulator.Run()
 ns.Simulator.Destroy()
