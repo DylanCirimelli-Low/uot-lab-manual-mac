@@ -2,8 +2,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import argparse
 
-import argparse
-
 # Create the argument parser
 parser = argparse.ArgumentParser()
 parser.add_argument('--sample_rate', type=str, required=True, help="The sample rate value")
