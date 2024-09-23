@@ -190,13 +190,13 @@ AlohaMac::Receive(Ptr<Packet> packet)
 
     AlohaHeader header;
     packet->RemoveHeader(header);
+    bool isAck = (header.GetSrc() == m_sinkAddress);
 
     // send ACK if we are the sink node and receive data
     if (m_macAddress == m_sinkAddress) {
         NS_LOG_INFO("Received data for self.");
         TransmitAck( packet, header.GetSrc() );
     }
-
     // cancel ACK timer if we are the intended receiver of the ACK
     else if (m_macAddress == header.GetDst()) {
         NS_LOG_INFO("Received ack for self.");
@@ -212,7 +212,9 @@ AlohaMac::Receive(Ptr<Packet> packet)
             m_transmissionTimer.Schedule(delay);
         }
          m_netDeviceReceive(packet, header.GetSrc());
-    } else if (m_usePriorityAcks) {
+    
+    
+    } else if (m_usePriorityAcks && !isAck) {
         if (m_transmissionTimer.IsRunning()) {
             Time currentDelay = m_transmissionTimer.GetDelayLeft();
             m_transmissionTimer.Cancel();

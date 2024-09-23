@@ -32,7 +32,7 @@ WirelessChannel::GetTypeId (void)
 							MakePointerChecker<PropagationDelayModel> ())
 					.AddAttribute ("TransmissionRange", 
 							"Maximum range in m that a signal will propagate",
-							DoubleValue(50.0), 
+							DoubleValue(100.0), 
 							MakeDoubleAccessor (&WirelessChannel::m_range),
 							MakeDoubleChecker<double> ())
 					.AddAttribute ("DataRate", 
