@@ -9,6 +9,6 @@ cd ns3
 git clone git@github.com:DylanCirimelli-Low/uot-lab-manual-mac.git contrib/
 ./ns3 configure --enable-python-bindings
 ./ns3
-cp contrib/aloha/examples/aloha.py scrach/
+cp contrib/aloha.py scrach/
 cp -r contrib/topologies .
 cp contrib/attributes.txt .
